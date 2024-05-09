@@ -374,7 +374,7 @@ const upload = multer({ storage: storage });
 app.post('/book', upload.single('image'), (req, res) => {
     const { bookData } = req.body;
     const { bookname, price, type, author } = JSON.parse(bookData);
-    const imageUrl = 'image' + req.file.filename;
+    const imageUrl = 'image/' + req.file.filename;
     console.log(req.file);
     const book = new BookData({ bookname, author, price, type, imageUrl, imageName: req.file.filename });
     book.save();
