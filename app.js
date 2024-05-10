@@ -78,107 +78,127 @@ const Blog = mongoose.model('blog', blog);
 const Category = mongoose.model('category', category);
 
 app.post('/register', async (req, res) => {
-    let body = req.body;
-    let isUser = await LoginData.find({ username: body.username });
-    let error = false;
-    let data = {};
-    if (isUser.length == 0) {
-        if (!body.username) {
-            data.username = "Please Enter Username";
-            error = true;
-        }
-        if (!body.password) {
-            data.password = "Please Enter Password";
-            error = true;
-        }
-        if (!body.email) {
-            data.password = "Please Enter Email";
-            error = true;
-        }
-        if (!body.mobileno) {
-            data.password = "Please Enter Mobile Number";
-            error = true;
-        }
-        if (!error) {
-            const newUser = new LoginData(body);
-            const savedUser = await newUser.save();
-            res.status(200).send({ code: 0, returnMessage: 'Register Successfully', data: savedUser })
+    try {
+        let body = req.body;
+        let isUser = await LoginData.find({ username: body.username });
+        let error = false;
+        let data = {};
+        if (isUser.length == 0) {
+            if (!body.username) {
+                data.username = "Please Enter Username";
+                error = true;
+            }
+            if (!body.password) {
+                data.password = "Please Enter Password";
+                error = true;
+            }
+            if (!body.email) {
+                data.password = "Please Enter Email";
+                error = true;
+            }
+            if (!body.mobileno) {
+                data.password = "Please Enter Mobile Number";
+                error = true;
+            }
+            if (!error) {
+                const newUser = new LoginData(body);
+                const savedUser = await newUser.save();
+                res.status(200).send({ code: 0, returnMessage: 'Register Successfully', data: savedUser })
+            }
+            else {
+                res.status(400).send({ code: 1, error: data })
+            }
         }
         else {
-            res.status(400).send({ code: 1, error: data })
+            res.send({ code: 1, returnMessage: "User Already Exist" })
         }
     }
-    else {
-        res.send({ code: 1, returnMessage: "User Already Exist" })
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 })
 
 app.post('/login', async (req, res) => {
-    let body = req.body;
-    console.log("body", body);
-    let isUser = await LoginData.findOne({ username: body.username });
-    console.log("body", isUser);
-    let data = {};
-    let error = false;
-    if (isUser) {
-        if (!body.username) {
-            data.username = "Please Enter Username";
-            error = true;
+    try {
+        let body = req.body;
+        console.log("body", body);
+        let isUser = await LoginData.findOne({ username: body.username });
+        console.log("body", isUser);
+        let data = {};
+        let error = false;
+        if (isUser) {
+            if (!body.username) {
+                data.username = "Please Enter Username";
+                error = true;
+            }
+            if (!body.password) {
+                data.password = "Please Enter Password";
+                error = true;
+            }
+            if (!body.email) {
+                data.password = "Please Enter Email";
+                error = true;
+            }
+            if (!error) {
+                res.status(200).send({ code: 0, returnMessage: 'Login Successfully' })
+            }
+            if (error) {
+                res.status(400).send({ code: 1, error: data })
+            }
         }
-        if (!body.password) {
-            data.password = "Please Enter Password";
-            error = true;
-        }
-        if (!body.email) {
-            data.password = "Please Enter Email";
-            error = true;
-        }
-        if (!error) {
-            res.status(200).send({ code: 0, returnMessage: 'Login Successfully' })
-        }
-        if (error) {
-            res.status(400).send({ code: 1, error: data })
+        else {
+            res.send({ code: 1, returnMessage: "User Doesn't Exist" })
         }
     }
-    else {
-        res.send({ code: 1, returnMessage: "User Doesn't Exist" })
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 })
 
 
 
 app.get('/get-contact-data', async (req, res) => {
-    let contactData = await ContactUs.find({});
-    res.send({ code: 0, data: contactData })
+    try {
+        let contactData = await ContactUs.find({});
+        res.send({ code: 0, data: contactData })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
 })
 
 app.post('/add-contact-data', async (req, res) => {
-    let body = req.body;
-    let data = {};
-    let error = false;
-    if (!body.message) {
-        data.message = "Please Enter message";
-        error = true;
+    try {
+        let body = req.body;
+        let data = {};
+        let error = false;
+        if (!body.message) {
+            data.message = "Please Enter message";
+            error = true;
+        }
+        if (!body.name) {
+            data.name = "Please Enter name";
+            error = true;
+        }
+        if (!body.mobileno) {
+            data.mobileno = "Please Enter Mobile No";
+            error = true;
+        }
+        if (!body.email) {
+            data.email = "Please Enter email";
+            error = true;
+        }
+        if (!error) {
+            const newUser = new ContactUs(body);
+            const savedUser = await newUser.save();
+            res.status(200).send({ code: 0, returnMessage: 'Contact Successfully', data: savedUser })
+        }
+        if (error) {
+            res.status(400).send({ code: 1, error: data })
+        }
     }
-    if (!body.name) {
-        data.name = "Please Enter name";
-        error = true;
-    }
-    if (!body.mobileno) {
-        data.mobileno = "Please Enter Mobile No";
-        error = true;
-    }
-    if (!body.email) {
-        data.email = "Please Enter email";
-        error = true;
-    }
-    if (!error) {
-        const newUser = new ContactUs(body);
-        const savedUser = await newUser.save();
-        res.status(200).send({ code: 0, returnMessage: 'Contact Successfully', data: savedUser })
-    }
-    if (error) {
-        res.status(400).send({ code: 1, error: data })
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 })
 
@@ -202,43 +222,63 @@ app.post('/add-contact-data', async (req, res) => {
 
 
 app.get('/get-blog', async (req, res) => {
-    let BlogData = await Blog.find({});
-    res.send({ code: 0, data: BlogData })
+    try {
+        let BlogData = await Blog.find({});
+        res.send({ code: 0, data: BlogData })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
 })
 
 app.get('/get-category', async (req, res) => {
-    let CategoryData = await Category.find({});
-    res.send({ code: 0, data: CategoryData })
+    try {
+        let CategoryData = await Category.find({});
+        res.send({ code: 0, data: CategoryData })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
 })
 
 app.post('/add-to-cart', async (req, res) => {
-    let body = req.body;
+    try {
+        let body = req.body;
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
 })
 
 
 
 app.post('/change-password', async (req, res) => {
-    let body = req.body;
-    console.log("body", body);
-    if (body.username) {
-        const user = await LoginData.findOne({ username: body.username });
-        if (body.newPassword) {
-            if (body.newPassword == body.oldPassword) {
-                res.status(400).send({ code: 1, returnMessage: "Old And New Password Are Same!!!" })
+    try {
+        let body = req.body;
+        console.log("body", body);
+        if (body.username) {
+            const user = await LoginData.findOne({ username: body.username });
+            if (body.newPassword) {
+                if (body.newPassword == body.oldPassword) {
+                    res.status(400).send({ code: 1, returnMessage: "Old And New Password Are Same!!!" })
+                }
+                else {
+                    user.password = body.password;
+                    const result = await LoginData.replaceOne({ username: body.username }, user);
+                    res.status(200).send({ code: 0, returnMessage: "Password Changed Successfully" })
+                }
             }
             else {
-                user.password = body.password;
-                const result = await LoginData.replaceOne({ username: body.username }, user);
-                res.status(200).send({ code: 0, returnMessage: "Password Changed Successfully" })
+                res.status(400).send({ returnMessage: "Password Required!!!" })
             }
+
         }
         else {
-            res.status(400).send({ returnMessage: "Password Required!!!" })
+            res.status(400).send({ returnMessage: "Username Required!!!" })
         }
-
     }
-    else {
-        res.status(400).send({ returnMessage: "Username Required!!!" })
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 })
 
@@ -251,8 +291,6 @@ app.post('/change-password', async (req, res) => {
 const adminLoginSchema = new mongoose.Schema({
     username: String,
     password: String,
-    email: String,
-    mobileno: String
 }, { collection: 'adminLogin' });
 const AdminLoginData = mongoose.model('AdminLoginData', adminLoginSchema);
 
@@ -266,124 +304,14 @@ const addBook = new mongoose.Schema({
 
 const BookData = mongoose.model('BookData', addBook);
 
-app.post('/register', async (req, res) => {
-    let body = req.body;
-    let isUser = await AdminLoginData.find({ username: body.username });
-    let error = false;
-    let data = {};
-    if (isUser.length == 0) {
-        if (!body.username) {
-            data.username = "Please Enter Username";
-            error = true;
-        }
-        if (!body.password) {
-            data.password = "Please Enter Password";
-            error = true;
-        }
-        if (!body.email) {
-            data.password = "Please Enter Email";
-            error = true;
-        }
-        if (!body.mobileno) {
-            data.password = "Please Enter Mobile Number";
-            error = true;
-        }
-        if (!error) {
-            const newUser = new AdminLoginData(body);
-            const savedUser = await newUser.save();
-            res.status(200).send({ code: 0, returnMessage: 'Register Successfully', data: savedUser })
-        }
-        else {
-            res.status(400).send({ code: 1, error: data })
-        }
-    }
-    else {
-        res.send({ code: 1, returnMessage: "User Already Exist" })
-    }
-})
+const addBookCategories = new mongoose.Schema({
+    type: String,
+    price: String,
+    imageUrl: String,
+    author: String
+}, { collection: 'bookCategories' });
+const BookCategoiesData = mongoose.model('BookCategoiesData', addBookCategories);
 
-app.post('/login', async (req, res) => {
-    let body = req.body;
-    console.log("body", body);
-    let isUser = await AdminLoginData.findOne({ username: body.username });
-    console.log("body", isUser);
-    let data = {};
-    let error = false;
-    if (isUser) {
-        if (!body.username) {
-            data.username = "Please Enter Username";
-            error = true;
-        }
-        if (!body.password) {
-            data.password = "Please Enter Password";
-            error = true;
-        }
-        if (!body.email) {
-            data.password = "Please Enter Email";
-            error = true;
-        }
-        if (!error) {
-            res.status(200).send({ code: 0, returnMessage: 'Login Successfully' })
-        }
-        if (error) {
-            res.status(400).send({ code: 1, error: data })
-        }
-    }
-    else {
-        res.send({ code: 1, returnMessage: "User Doesn't Exist" })
-    }
-})
-
-app.post('/change-password', async (req, res) => {
-    let body = req.body;
-    console.log("body", body);
-    if (body.username) {
-        const user = await AdminLoginData.findOne({ username: body.username });
-        if (body.newPassword) {
-            if (body.newPassword == body.oldPassword) {
-                res.status(400).send({ code: 1, returnMessage: "Old And New Password Are Same!!!" })
-            }
-            else {
-                user.password = body.password;
-                const result = await AdminLoginData.replaceOne({ username: body.username }, user);
-                res.status(200).send({ code: 0, returnMessage: "Password Changed Successfully" })
-            }
-        }
-        else {
-            res.status(400).send({ returnMessage: "Password Required!!!" })
-        }
-
-    }
-    else {
-        res.status(400).send({ returnMessage: "Username Required!!!" })
-    }
-})
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname);
-    }
-});
-
-
-const upload = multer({ storage: storage });
-
-app.post('/book', upload.single('image'), (req, res) => {
-    const { bookData } = req.body;
-    const { bookname, price, type, author } = JSON.parse(bookData);
-    const imageUrl = 'image/' + req.file.filename;
-    console.log(req.file);
-    const book = new BookData({ bookname, author, price, type, imageUrl, imageName: req.file.filename });
-    book.save();
-    res.status(200).send({ code: 0, returnMessage: 'Book Added successfully' });
-},);
-app.get('/get-book', (req, res) => {
-    const book = new BookData.find({});
-    res.status(200).send({ code: 0, data: book });
-},);
 
 function deleteImage(filename) {
     const __filename = fileURLToPath(import.meta.url);
@@ -399,10 +327,235 @@ function deleteImage(filename) {
     });
 }
 
+
+
+app.post('/Adminlogin', async (req, res) => {
+    try {
+        let body = req.body;
+        console.log("body", body);
+        let isUser = await AdminLoginData.findOne({ username: body.username });
+        console.log("body", isUser);
+        let data = {};
+        let error = false;
+        if (isUser) {
+            if (!body.username) {
+                data.username = "Please Enter Username";
+                error = true;
+            }
+            if (!body.password) {
+                data.password = "Please Enter Password";
+                error = true;
+            }
+            if (!error) {
+                res.status(200).send({ code: 0, data: isUser, returnMessage: 'Login Successfully' })
+            }
+            if (error) {
+                res.status(400).send({ code: 1, error: data })
+            }
+        }
+        else {
+            res.send({ code: 1, returnMessage: "User Doesn't Exist" })
+        }
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+
+app.post('/change-password', async (req, res) => {
+    try {
+        let body = req.body;
+        console.log("body", body);
+        if (body.username) {
+            const user = await AdminLoginData.findOne({ username: body.username });
+            if (body.newPassword) {
+                if (body.newPassword == body.oldPassword) {
+                    res.status(400).send({ code: 1, returnMessage: "Old And New Password Are Same!!!" })
+                }
+                else {
+                    user.password = body.password;
+                    const result = await AdminLoginData.replaceOne({ username: body.username }, user);
+                    res.status(200).send({ code: 0, returnMessage: "Password Changed Successfully" })
+                }
+            }
+            else {
+                res.status(400).send({ returnMessage: "Password Required!!!" })
+            }
+
+        }
+        else {
+            res.status(400).send({ returnMessage: "Username Required!!!" })
+        }
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+//book :-
+app.post('/book', upload.single('image'), (req, res) => {
+    try {
+        const { bookData } = req.body;
+        const { bookname, price, type, author } = JSON.parse(bookData);
+        const imageUrl = 'image/' + req.file.filename;
+        console.log(req.file);
+        const book = new BookData({ bookname, author, price, type, imageUrl });
+        book.save();
+        res.status(200).send({ code: 0, returnMessage: 'Book Added successfully' });
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+},);
+app.get('/get-book', async (req, res) => {
+    try {
+        const book = await BookData.find({});
+        res.status(200).send({ code: 0, data: book });
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+},);
+app.post('/update-book', upload.single('image'), async (req, res) => {
+    try {
+        const { bookData } = req.body;
+        const { id, type, price, author, originalFileName } = JSON.parse(bookData);
+        let imageUrl;
+        if (originalFileName) {
+            if (req.file) {
+                // Delete previous image if filename has changed
+                if (originalFileName !== imageUrl) {
+                    const imageName = originalFileName.split('/') 
+                    deleteImage(imageName[imageName.length - 1]);
+                    imageUrl = 'image/' + req.file.filename;
+                }
+            } else {
+                // Use existing image URL if no new image is uploaded
+                imageUrl = originalFileName;
+            }
+            let data = await BookData.findByIdAndUpdate(id, { type, price, author, imageUrl });
+            console.log(data);
+            res.status(200).send({ code: 0, returnMessage: 'Book updated successfully' });
+        } else {
+            res.status(400).send('Missing originalFileName');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ code: 2, returnMessage: 'Something went wrong' });
+    }
+});
+app.get('/Deletebook/:id', async (req, res) => {
+    let id = req.params.id;
+    try {
+        if (id) {
+            const user = await BookData.findOne({ _id: id });
+            if (user) {
+                console.log(id);
+                const book = await BookData.findOneAndDelete({ _id: id });
+                res.status(200).send({ code: 0, data: book, returnMessage: 'Deleted Successfully!' });
+            }
+            else {
+                res.status(400).send({ code: 1, returnMessage: "User Doesn't Exist!" });
+            }
+        }
+        else {
+            res.status(400).send({ code: 1, returnMessage: 'Id Not Valid!!' });
+        }
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+});
+//book-catgories:-
+app.post('/book-catgories', upload.single('image'), async (req, res) => {
+    try {
+        const { bookCat } = req.body;
+        console.log(bookCat);
+        const { type, price, author } = JSON.parse(bookCat);
+        const imageUrl = 'image/' + req.file.filename;
+        console.log(req.file);
+        const bookCategores = await new BookCategoiesData({ type, price, author, imageUrl });
+        bookCategores.save();
+        res.status(200).send({ code: 0, returnMessage: 'Book Added successfully' });
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+});
+app.post('/update-book-categories', upload.single('image'), async (req, res) => {
+    try {
+        const { bookCat } = req.body;
+        const { id, type, price, author, originalFileName } = JSON.parse(bookCat);
+        let imageUrl;
+        if (originalFileName) {
+            if (req.file) {
+                // Delete previous image if filename has changed
+                if (originalFileName !== imageUrl) {
+                    const imageName = originalFileName.split('/')
+                    deleteImage(imageName[imageName.length - 1]);
+                    imageUrl = 'image/' + req.file.filename;
+                }
+            } else {
+                // Use existing image URL if no new image is uploaded
+                imageUrl = originalFileName;
+            }
+            let data = await BookCategoiesData.findByIdAndUpdate(id, { type, price, author, imageUrl });
+            console.log(data);
+            res.status(200).send({ code: 0, returnMessage: 'Book updated successfully' });
+        } else {
+            res.status(400).send('Missing originalFileName');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ code: 2, returnMessage: 'Something went wrong' });
+    }
+});
+
+app.get('/get-book-catgories', upload.single('image'), async (req, res) => {
+    try {
+        let data = await BookCategoiesData.find({})
+        res.status(200).send({ code: 0, data: data })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+app.get('/deletebookCategories/:id', async (req, res) => {
+    let id = req.params.id;
+    try {
+        if (id) {
+            const user = await BookCategoiesData.findOne({ _id: id });
+            if (user) {
+                console.log(id);
+                const book = await BookCategoiesData.findOneAndDelete({ _id: id });
+                res.status(200).send({ code: 0, data: book, returnMessage: 'Deleted Successfully!' });
+            }
+            else {
+                res.status(400).send({ code: 1, returnMessage: "User Doesn't Exist!" });
+            }
+        }
+        else {
+            res.status(400).send({ code: 1, returnMessage: 'Id Not Valid!!' });
+        }
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+});
 // Example usage
 // const filenameToDelete = 'delete.png';
 // deleteImage(filenameToDelete);
-
 // Server Port 
 app.listen(3000, () => {
     console.log('Server Is Running on Port 3000')
