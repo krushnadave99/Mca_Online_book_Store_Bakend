@@ -71,11 +71,16 @@ const addtocart = new mongoose.Schema({
 
 
 
-
 const LoginData = mongoose.model('LoginData', loginSchema);
 const ContactUs = mongoose.model('ContactUs', contactUs);
 const Blog = mongoose.model('blog', blog);
 const Category = mongoose.model('category', category);
+
+
+
+app.get('/', (req, res) => {
+    res.send('Welcome,Book Store!!');
+  });
 
 app.post('/register', async (req, res) => {
     try {
@@ -436,7 +441,7 @@ app.post('/update-book', upload.single('image'), async (req, res) => {
             if (req.file) {
                 // Delete previous image if filename has changed
                 if (originalFileName !== imageUrl) {
-                    const imageName = originalFileName.split('/') 
+                    const imageName = originalFileName.split('/')
                     deleteImage(imageName[imageName.length - 1]);
                     imageUrl = 'image/' + req.file.filename;
                 }
