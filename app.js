@@ -59,7 +59,6 @@ const category = new mongoose.Schema({
     title: String
 }, { collection: 'category' });
 
-
 const addtocart = new mongoose.Schema({
     quantity: String,
     bookname: String,
@@ -68,6 +67,9 @@ const addtocart = new mongoose.Schema({
     author: String
 }, { collection: 'cart' });
 
+const addtopayment =new mongoose.Schema({
+
+},{collation:'payment'})
 
 
 
@@ -75,12 +77,14 @@ const LoginData = mongoose.model('LoginData', loginSchema);
 const ContactUs = mongoose.model('ContactUs', contactUs);
 const Blog = mongoose.model('blog', blog);
 const Category = mongoose.model('category', category);
+// const Addtocart = mongoose.model('cart', addtocart);
+const Addtopayment = mongoose.model('payment', addtopayment);
 
 
 
 app.get('/', (req, res) => {
     res.send('Welcome,Book Store!!');
-  });
+});
 
 app.post('/register', async (req, res) => {
     try {
@@ -126,9 +130,7 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     try {
         let body = req.body;
-        console.log("body", body);
         let isUser = await LoginData.findOne({ username: body.username });
-        console.log("body", isUser);
         let data = {};
         let error = false;
         if (isUser) {
@@ -154,18 +156,6 @@ app.post('/login', async (req, res) => {
         else {
             res.send({ code: 1, returnMessage: "User Doesn't Exist" })
         }
-    }
-    catch {
-        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
-    }
-})
-
-
-
-app.get('/get-contact-data', async (req, res) => {
-    try {
-        let contactData = await ContactUs.find({});
-        res.send({ code: 0, data: contactData })
     }
     catch {
         res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
@@ -207,25 +197,6 @@ app.post('/add-contact-data', async (req, res) => {
     }
 })
 
-
-
-// app.post('/upload', (req, res) => {
-//     upload(req, res, (err) => {
-//         if (err) {
-//             console.error(err);
-//             res.status(500).send('An error occurred');
-//         } else {
-//             if (req.file) {
-//                 console.log('File uploaded:', req.file);
-//                 res.status(200).send('File uploaded successfully');
-//             } else {
-//                 res.status(400).send('No file selected');
-//             }
-//         }
-//     });
-// })
-
-
 app.get('/get-blog', async (req, res) => {
     try {
         let BlogData = await Blog.find({});
@@ -245,7 +216,6 @@ app.get('/get-category', async (req, res) => {
         res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 })
-
 app.post('/add-to-cart', async (req, res) => {
     try {
         let body = req.body;
@@ -254,13 +224,9 @@ app.post('/add-to-cart', async (req, res) => {
         res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 })
-
-
-
 app.post('/change-password', async (req, res) => {
     try {
         let body = req.body;
-        console.log("body", body);
         if (body.username) {
             const user = await LoginData.findOne({ username: body.username });
             if (body.newPassword) {
@@ -290,9 +256,6 @@ app.post('/change-password', async (req, res) => {
 
 
 // Admin_Apis
-
-
-
 const adminLoginSchema = new mongoose.Schema({
     username: String,
     password: String,
@@ -317,6 +280,17 @@ const addBookCategories = new mongoose.Schema({
 }, { collection: 'bookCategories' });
 const BookCategoiesData = mongoose.model('BookCategoiesData', addBookCategories);
 
+const addblog = new mongoose.Schema({
+    content: String,
+    imageUrl: String,
+}, { collection: 'blog' });
+const BlogsData = mongoose.model('BlogsData', addblog);
+
+const addauthor = new mongoose.Schema({
+    book: String,
+    bookcategories: String,
+}, { collection: 'author' });
+const AuthorData = mongoose.model('AuthorData', addauthor);
 
 function deleteImage(filename) {
     const __filename = fileURLToPath(import.meta.url);
@@ -328,7 +302,6 @@ function deleteImage(filename) {
             console.error('Error deleting image:', err);
             return;
         }
-        console.log('Image deleted successfully');
     });
 }
 
@@ -337,9 +310,7 @@ function deleteImage(filename) {
 app.post('/Adminlogin', async (req, res) => {
     try {
         let body = req.body;
-        console.log("body", body);
         let isUser = await AdminLoginData.findOne({ username: body.username });
-        console.log("body", isUser);
         let data = {};
         let error = false;
         if (isUser) {
@@ -370,7 +341,6 @@ app.post('/Adminlogin', async (req, res) => {
 app.post('/change-password', async (req, res) => {
     try {
         let body = req.body;
-        console.log("body", body);
         if (body.username) {
             const user = await AdminLoginData.findOne({ username: body.username });
             if (body.newPassword) {
@@ -414,7 +384,6 @@ app.post('/book', upload.single('image'), (req, res) => {
         const { bookData } = req.body;
         const { bookname, price, type, author } = JSON.parse(bookData);
         const imageUrl = 'image/' + req.file.filename;
-        console.log(req.file);
         const book = new BookData({ bookname, author, price, type, imageUrl });
         book.save();
         res.status(200).send({ code: 0, returnMessage: 'Book Added successfully' });
@@ -450,7 +419,6 @@ app.post('/update-book', upload.single('image'), async (req, res) => {
                 imageUrl = originalFileName;
             }
             let data = await BookData.findByIdAndUpdate(id, { type, price, author, imageUrl });
-            console.log(data);
             res.status(200).send({ code: 0, returnMessage: 'Book updated successfully' });
         } else {
             res.status(400).send('Missing originalFileName');
@@ -466,7 +434,6 @@ app.get('/Deletebook/:id', async (req, res) => {
         if (id) {
             const user = await BookData.findOne({ _id: id });
             if (user) {
-                console.log(id);
                 const book = await BookData.findOneAndDelete({ _id: id });
                 res.status(200).send({ code: 0, data: book, returnMessage: 'Deleted Successfully!' });
             }
@@ -486,10 +453,8 @@ app.get('/Deletebook/:id', async (req, res) => {
 app.post('/book-catgories', upload.single('image'), async (req, res) => {
     try {
         const { bookCat } = req.body;
-        console.log(bookCat);
         const { type, price, author } = JSON.parse(bookCat);
         const imageUrl = 'image/' + req.file.filename;
-        console.log(req.file);
         const bookCategores = await new BookCategoiesData({ type, price, author, imageUrl });
         bookCategores.save();
         res.status(200).send({ code: 0, returnMessage: 'Book Added successfully' });
@@ -516,7 +481,6 @@ app.post('/update-book-categories', upload.single('image'), async (req, res) => 
                 imageUrl = originalFileName;
             }
             let data = await BookCategoiesData.findByIdAndUpdate(id, { type, price, author, imageUrl });
-            console.log(data);
             res.status(200).send({ code: 0, returnMessage: 'Book updated successfully' });
         } else {
             res.status(400).send('Missing originalFileName');
@@ -542,7 +506,6 @@ app.get('/deletebookCategories/:id', async (req, res) => {
         if (id) {
             const user = await BookCategoiesData.findOne({ _id: id });
             if (user) {
-                console.log(id);
                 const book = await BookCategoiesData.findOneAndDelete({ _id: id });
                 res.status(200).send({ code: 0, data: book, returnMessage: 'Deleted Successfully!' });
             }
@@ -558,10 +521,161 @@ app.get('/deletebookCategories/:id', async (req, res) => {
         res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 });
-// Example usage
-// const filenameToDelete = 'delete.png';
-// deleteImage(filenameToDelete);
-// Server Port 
+//Blog:-
+app.post('/blog', upload.single('image'), (req, res) => {
+    try {
+        const { blogData } = req.body;
+        const { content } = JSON.parse(blogData);
+        const imageUrl = 'image/' + req.file.filename;
+        const book = new BlogsData({ content, imageUrl });
+        book.save();
+        res.status(200).send({ code: 0, returnMessage: 'Blog Added successfully' });
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+},);
+app.get('/get-blog', upload.single('image'), async (req, res) => {
+    try {
+        let data = await BlogsData.find({})
+        res.status(200).send({ code: 0, data: data })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+app.post('/update-book-blog', upload.single('image'), async (req, res) => {
+    try {
+        const { blogData } = req.body;
+        const { content, originalFileName, id } = JSON.parse(blogData);
+        let imageUrl;
+        if (originalFileName) {
+            if (req.file) {
+                // Delete previous image if filename has changed
+                if (originalFileName !== imageUrl) {
+                    const imageName = originalFileName.split('/')
+                    deleteImage(imageName[imageName.length - 1]);
+                    imageUrl = 'image/' + req.file.filename;
+                }
+            } else {
+                // Use existing image URL if no new image is uploaded
+                imageUrl = originalFileName;
+            }
+            let data = await BlogsData.findByIdAndUpdate(id, { content, imageUrl });
+            res.status(200).send({ code: 0, returnMessage: 'Blog updated successfully' });
+        } else {
+            res.status(400).send('Missing originalFileName');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ code: 2, returnMessage: 'Something went wrong' });
+    }
+});
+app.get('/deleteBlog/:id', async (req, res) => {
+    let id = req.params.id;
+    try {
+        if (id) {
+            const user = await BlogsData.findOne({ _id: id });
+            if (user) {
+                const blog = await BlogsData.findOneAndDelete({ _id: id });
+                res.status(200).send({ code: 0, data: blog, returnMessage: 'Deleted Successfully!' });
+            }
+            else {
+                res.status(400).send({ code: 1, returnMessage: "User Doesn't Exist!" });
+            }
+        }
+        else {
+            res.status(400).send({ code: 1, returnMessage: 'Id Not Valid!!' });
+        }
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+});
+//Author:-
+app.post('/author', async (req, res) => {
+    try {
+        const { bookcategories, book } = req.body;
+        // if (bookcategories &&book) {
+        const author = new AuthorData({ bookcategories, book });
+        const savedUser = await author.save();
+        res.status(200).send({ code: 0, returnMessage: 'Author Successfully', data: { bookcategories, book } })
+        // }
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+app.get('/get-author', async (req, res) => {
+    try {
+        let data = await AuthorData.find({});
+        res.send({ code: 0, data: data })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+app.post('/update-Author', async (req, res) => {
+    try {
+        const { book, bookcategories, id } = req.body;
+        let data = await AuthorData.findByIdAndUpdate(id, { book, bookcategories });
+        console.log(data);
+        res.status(200).send({ code: 0, returnMessage: 'Author updated successfully' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ code: 2, returnMessage: 'Something went wrong' });
+    }
+});
+app.get('/deleteAuthor/:id', async (req, res) => {
+    let id = req.params.id;
+    try {
+        if (id) {
+            const user = await AuthorData.findOne({ _id: id });
+            if (user) {
+                const authorData = await AuthorData.findOneAndDelete({ _id: id });
+                res.status(200).send({ code: 0, data: authorData, returnMessage: 'Deleted Successfully!' });
+            }
+            else {
+                res.status(400).send({ code: 1, returnMessage: "User Doesn't Exist!" });
+            }
+        }
+        else {
+            res.status(400).send({ code: 1, returnMessage: 'Id Not Valid!!' });
+        }
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+});
+//contact us:-
+app.get('/get-contact-data', async (req, res) => {
+    try {
+        let contactData = await ContactUs.find({});
+        res.send({ code: 0, data: contactData })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+//payment:-
+app.get('/get-payment', async (req, res) => {
+    try {
+        let PaymentData = await Addtopayment.find({});
+        res.send({ code: 0, data: PaymentData })
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+
+//delete many data:-
+// app.get('/', async (req, res) => {
+//     let data = await AuthorData.deleteMany({});
+//     console.log(data)
+//     res.send({ data });
+// })
+
 app.listen(3000, () => {
     console.log('Server Is Running on Port 3000')
 })
