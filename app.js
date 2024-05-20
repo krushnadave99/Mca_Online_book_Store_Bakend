@@ -287,8 +287,7 @@ const addblog = new mongoose.Schema({
 const BlogsData = mongoose.model('BlogsData', addblog);
 
 const addauthor = new mongoose.Schema({
-    book: String,
-    bookcategories: String,
+    authorname: String,
 }, { collection: 'author' });
 const AuthorData = mongoose.model('AuthorData', addauthor);
 
@@ -595,11 +594,11 @@ app.get('/deleteBlog/:id', async (req, res) => {
 //Author:-
 app.post('/author', async (req, res) => {
     try {
-        const { bookcategories, book } = req.body;
+        const { authorname } = req.body;
         // if (bookcategories &&book) {
-        const author = new AuthorData({ bookcategories, book });
+        const author = new AuthorData({ authorname });
         const savedUser = await author.save();
-        res.status(200).send({ code: 0, returnMessage: 'Author Successfully', data: { bookcategories, book } })
+        res.status(200).send({ code: 0, returnMessage: 'Author Successfully', data: { authorname} })
         // }
     }
     catch {
@@ -617,8 +616,8 @@ app.get('/get-author', async (req, res) => {
 })
 app.post('/update-Author', async (req, res) => {
     try {
-        const { book, bookcategories, id } = req.body;
-        let data = await AuthorData.findByIdAndUpdate(id, { book, bookcategories });
+        const {authorname, id } = req.body;
+        let data = await AuthorData.findByIdAndUpdate(id, { authorname });
         console.log(data);
         res.status(200).send({ code: 0, returnMessage: 'Author updated successfully' });
 
@@ -671,7 +670,7 @@ app.get('/get-payment', async (req, res) => {
 
 //delete many data:-
 // app.get('/', async (req, res) => {
-//     let data = await AuthorData.deleteMany({});
+//     let data = await ContactUs.deleteMany({});
 //     console.log(data)
 //     res.send({ data });
 // })
