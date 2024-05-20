@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 app.use('/image', express.static('uploads'))
 const corsOpts = {
-    origin: '*',
+    origin: 'http://localhost:4200',
 
     methods: [
         'GET',
@@ -67,9 +67,13 @@ const addtocart = new mongoose.Schema({
     author: String
 }, { collection: 'cart' });
 
-const addtopayment =new mongoose.Schema({
-
-},{collation:'payment'})
+const addtopayment = new mongoose.Schema({
+    name:String,
+    email:String,
+    contact:String,
+    amount:String,
+    description:String
+}, { collation: 'payment' })
 
 
 
@@ -128,6 +132,7 @@ app.post('/register', async (req, res) => {
 })
 
 app.post('/login', async (req, res) => {
+    console.log("Login");
     try {
         let body = req.body;
         let isUser = await LoginData.findOne({ username: body.username });
@@ -217,6 +222,14 @@ app.get('/get-category', async (req, res) => {
     }
 })
 app.post('/add-to-cart', async (req, res) => {
+    try {
+        let body = req.body;
+    }
+    catch {
+        res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
+    }
+})
+app.post('/add-to-payment', async (req, res) => {
     try {
         let body = req.body;
     }
@@ -598,7 +611,7 @@ app.post('/author', async (req, res) => {
         // if (bookcategories &&book) {
         const author = new AuthorData({ authorname });
         const savedUser = await author.save();
-        res.status(200).send({ code: 0, returnMessage: 'Author Successfully', data: { authorname} })
+        res.status(200).send({ code: 0, returnMessage: 'Author Successfully', data: { authorname } })
         // }
     }
     catch {
@@ -616,7 +629,7 @@ app.get('/get-author', async (req, res) => {
 })
 app.post('/update-Author', async (req, res) => {
     try {
-        const {authorname, id } = req.body;
+        const { authorname, id } = req.body;
         let data = await AuthorData.findByIdAndUpdate(id, { authorname });
         console.log(data);
         res.status(200).send({ code: 0, returnMessage: 'Author updated successfully' });
