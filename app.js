@@ -14,7 +14,8 @@ app.use(bodyParser.json());
 
 app.use('/image', express.static('uploads'))
 const corsOpts = {
-    origin: 'http://localhost:4200',
+    // origin: 'http://localhost:4200',
+    origin: '*',
 
     methods: [
         'GET',
@@ -68,11 +69,11 @@ const addtocart = new mongoose.Schema({
 }, { collection: 'cart' });
 
 const addtopayment = new mongoose.Schema({
-    name:String,
-    email:String,
-    contact:String,
-    amount:String,
-    description:String
+    name: String,
+    email: String,
+    contact: String,
+    amount: String,
+    description: String
 }, { collation: 'payment' })
 
 
@@ -287,9 +288,6 @@ const BookData = mongoose.model('BookData', addBook);
 
 const addBookCategories = new mongoose.Schema({
     type: String,
-    price: String,
-    imageUrl: String,
-    author: String
 }, { collection: 'bookCategories' });
 const BookCategoiesData = mongoose.model('BookCategoiesData', addBookCategories);
 
@@ -462,12 +460,10 @@ app.get('/Deletebook/:id', async (req, res) => {
     }
 });
 //book-catgories:-
-app.post('/book-catgories', upload.single('image'), async (req, res) => {
+app.post('/book-catgories', async (req, res) => {
     try {
-        const { bookCat } = req.body;
-        const { type, price, author } = JSON.parse(bookCat);
-        const imageUrl = 'image/' + req.file.filename;
-        const bookCategores = await new BookCategoiesData({ type, price, author, imageUrl });
+        const { type } = req.body;
+        const bookCategores = await new BookCategoiesData({ type });
         bookCategores.save();
         res.status(200).send({ code: 0, returnMessage: 'Book Added successfully' });
     }
@@ -475,35 +471,33 @@ app.post('/book-catgories', upload.single('image'), async (req, res) => {
         res.status(401).send({ code: 2, returnMessage: 'something went wrong' });
     }
 });
-app.post('/update-book-categories', upload.single('image'), async (req, res) => {
+app.post('/update-book-categories', async (req, res) => {
     try {
-        const { bookCat } = req.body;
-        const { id, type, price, author, originalFileName } = JSON.parse(bookCat);
-        let imageUrl;
-        if (originalFileName) {
-            if (req.file) {
-                // Delete previous image if filename has changed
-                if (originalFileName !== imageUrl) {
-                    const imageName = originalFileName.split('/')
-                    deleteImage(imageName[imageName.length - 1]);
-                    imageUrl = 'image/' + req.file.filename;
-                }
-            } else {
-                // Use existing image URL if no new image is uploaded
-                imageUrl = originalFileName;
-            }
-            let data = await BookCategoiesData.findByIdAndUpdate(id, { type, price, author, imageUrl });
-            res.status(200).send({ code: 0, returnMessage: 'Book updated successfully' });
-        } else {
-            res.status(400).send('Missing originalFileName');
-        }
+        const { id, type } = req.body;
+        // const { id, type, price, author, originalFileName } = JSON.parse(bookCat);
+        // let imageUrl;
+        // if (originalFileName) {
+        //     if (req.file) {
+        //         // Delete previous image if filename has changed
+        //         if (originalFileName !== imageUrl) {
+        //             const imageName = originalFileName.split('/')
+        //             deleteImage(imageName[imageName.length - 1]);
+        //             imageUrl = 'image/' + req.file.filename;
+        //         }
+        //     } else {
+        //         // Use existing image URL if no new image is uploaded
+        //         imageUrl = originalFileName;
+        //     }
+        let data = await BookCategoiesData.findByIdAndUpdate(id, { type });
+        res.status(200).send({ code: 0, returnMessage: 'Book updated successfully' });
+
     } catch (error) {
         console.error(error);
         res.status(500).send({ code: 2, returnMessage: 'Something went wrong' });
     }
 });
 
-app.get('/get-book-catgories', upload.single('image'), async (req, res) => {
+app.get('/get-book-catgories', async (req, res) => {
     try {
         let data = await BookCategoiesData.find({})
         res.status(200).send({ code: 0, data: data })
